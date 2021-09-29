@@ -1,14 +1,18 @@
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
+from heapq import nlargest
 
 nlp=spacy.load('en_core_web_sm')
 
+def print_summary(raw_text, summary_text):
+    print(summary_text)
 
-
+    print("length of original text = " + str(len(raw_text)))
+    print("length of summary text = " + str(len(summary_text)))
 
 # define the text to summarise
-text="""
+raw_text="""
 Passwords have long been the de facto method for authenticating services on the web from as long as we can remember. People keep handy small passwords, that they can remember. But passwords, are inherently unsafe. Let’s say you have an 8 digit long alphanumeric password with small alphabets, for your web services.
 Each place can either have 26 distinct alphabets or 10 numbers making the alphabet size of 36. So, the total possible passwords of 8 digits would be pow(36,8). That would be around 2.82e12 possible passwords. A possible brute force method with a generic system that “guesses” 1e8 passwords per second would take a little over 7.5 hours to break into. Most people won’t have a longer or more complex password than that because they tend to forget it. Add to such attacks a sophisticated dictionary attack and a generic password would not hold a minute against such password generators. This is what makes traditional passwords systems insecure.
 A possible method to mitigate this problem would be to use fingerprints and other biometrics for uniquely determining user identity. This approach also has two major flaws. They are:
@@ -19,7 +23,7 @@ Searching the data size for a huge dataset of fingerprints would still be an iss
 """
 
 # tokenise the text
-doc=nlp(text)
+doc=nlp(raw_text)
 
 # generate tokens
 tokens=[]
@@ -27,7 +31,7 @@ for token in doc:
     tokens.append(token.text)
 
 # generate word list to filtered out
-extra_word=list(STOP_WORDS) + list(punctuation) + list('\n')
+extra_word=list(STOP_WORDS) + list(punctuation) + list("\n")
 
 # generate word frequency
 word_freq={}
@@ -44,3 +48,29 @@ for word in doc:
 max_freq=max(word_freq.values())
 for word in word_freq.keys():
     word_freq[word]/=max_freq
+
+# generate list of sentence_token
+sentence_token=[]
+for i in doc.sents:
+    sentence_token.append(i)
+
+# generate sentence_token_score
+sentence_token_score={}
+for i in sentence_token:
+    for j in i:
+        lower_word=j.text.lower()
+        if lower_word not in extra_word:
+            if i in sentence_token_score.keys():
+                sentence_token_score[i]+=word_freq[lower_word]
+            else:
+                sentence_token_score[i]=word_freq[lower_word]
+
+select_length=int(len(sentence_token)*0.3)
+summary_1=nlargest(select_length, sentence_token_score, key=sentence_token_score.get)
+
+summary_2=[]
+for i in summary_1:
+    summary_2.append(i.text)
+
+summary_3 = " ".join((summary_2))
+print_summary(raw_text, summary_3)
