@@ -26,3 +26,21 @@ tokens=[]
 for token in doc:
     tokens.append(token.text)
 
+# generate word list to filtered out
+extra_word=list(STOP_WORDS) + list(punctuation) + list('\n')
+
+# generate word frequency
+word_freq={}
+for word in doc:
+    word_key=word.text.lower()
+    if word_key not in extra_word:
+        if word_key not in word_freq.keys():
+            word_freq[word_key]=1
+        else:
+            word_freq[word_key]+=1
+
+
+# make normalised frequency
+max_freq=max(word_freq.values())
+for word in word_freq.keys():
+    word_freq[word]/=max_freq
