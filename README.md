@@ -5,6 +5,9 @@
 - Activate venv: `source ./venv/bin/activate`
 - Downlaod spacy dependency: `python3 -m spacy download en_core_web_sm`
 
+## Usage:
+- To use the script: `./main.py file_path`.
+
 ## Steps:
 - Text Cleaning
 - Sentence Tokenisation
